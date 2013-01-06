@@ -1,0 +1,3 @@
+[submodule "banana-engine"]
+	path = banana-engine
+	url = https://github.com/GameDevelopmentStudio/banana-engine.git
