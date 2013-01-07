@@ -14,6 +14,11 @@ namespace ldh
         protected override void initSettings()
         {
             base.initSettings();
+
+            horizontalZoom = 4;
+            verticalZoom = 4;
+            width = 160;
+            height = 144;
         }
 
         protected override void Initialize()

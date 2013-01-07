@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using System.IO;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
@@ -19,6 +21,11 @@ namespace ldh.Gameplay
 
         float walkSpeed = 2.0f;
         string facing;
+
+        PlayerWeapon activeWeapon;
+        Dictionary<int, Point> frameHotspots;
+
+        List<string> weaponBehindPlayerDirectionList;
 
         public Hunter(int x, int y)
             : base(x, y)
@@ -58,9 +65,15 @@ namespace ldh.Gameplay
 
             facing = "s";
 
-            graphic.play("idle-s");
-        }
+            activeWeapon = new PlayerWeapon(game);
 
+            graphic.play("idle-s");
+
+            // Weapon holding related
+            frameHotspots = parseFrameHotspots();
+            weaponBehindPlayerDirectionList = new List<string>{"sw", "w", "nw", "n"};
+        }
+        
         public override void update()
         {
             base.update();
@@ -145,15 +158,27 @@ namespace ldh.Gameplay
             name += facing;
 
             graphic.play(name);
+            activeWeapon.play(name);
             
             graphic.update();
+            activeWeapon.update();
         }
         
         public override void render(GameTime dt, SpriteBatch sb)
         {
             base.render(dt, sb);
 
-            graphic.render(sb, pos);
+            if (weaponBehindPlayerDirectionList.Contains(facing))
+            {
+                renderWeapon(sb);
+                renderPlayer(sb);
+            }
+            else
+            {
+                renderPlayer(sb);
+                renderWeapon(sb);
+            }
+            
 
             if (debugText.Length > 0)
             {
@@ -162,5 +187,80 @@ namespace ldh.Gameplay
                 sb.DrawString(game.gameFont, debugText, textPosition, Color.White);
             }
         }
+
+            protected void renderPlayer(SpriteBatch sb)
+            {
+                graphic.render(sb, pos);
+            }
+
+            protected void renderWeapon(SpriteBatch sb)
+            {
+                Point hotspot = frameHotspots[graphic.currentAnim.frame];
+                Vector2 hotspotPosition = add(pos, hotspot);
+                activeWeapon.render(sb, hotspotPosition);
+                sb.Draw(bDummyRect.sharedDummyRect(game),
+                        new Rectangle((int)hotspotPosition.X, (int)hotspotPosition.Y, 1, 1),
+                        Color.Coral);
+            }
+
+        // TODO: Move this to Utils package!
+        public static Vector2 add(Vector2 v, Point p)
+        {
+            return new Vector2(v.X + p.X, v.Y + p.Y);
+        }
+
+        public static Vector2 subtract(Vector2 v, Point p)
+        {
+            return new Vector2(v.X - p.X, v.Y - p.Y);
+        }
+
+        protected Dictionary<int, Point> parseFrameHotspots()
+        {
+            Dictionary<int, Point> result = new Dictionary<int, Point>();
+
+            string fname = "Assets/hunter.cfg";
+            Queue<string> lines = readFile(fname);
+            foreach (string line in lines)
+            {
+                string[] lineData = line.Split(' ');
+                result.Add(int.Parse(lineData[0]), 
+                           new Point(int.Parse(lineData[1]), int.Parse(lineData[2])));
+            }
+
+            return result;
+        }
+
+        protected Queue<string> readFile(string fname)
+        {
+            // Read cfg file
+            StreamReader reader = new StreamReader(fname);
+            // line by line
+            Queue<String> lines = new Queue<string>();
+            while (!reader.EndOfStream)
+            {
+                string line = reader.ReadLine();
+                // Remove comments and empty lines
+                int index = line.IndexOf('#');
+                if (line.Length <= 0 || index == 0)
+                    continue;
+                else if (index > 0)
+                    line = line.Substring(0, index);
+
+                // Replace tabs with spaces
+                line = line.Replace('\t', ' ');
+                // Remove spaces in front and after
+                line = line.Trim();
+                // Re-check for empty lines
+                if (line.Length <= 0)
+                    continue;
+
+                lines.Enqueue(line);
+            }
+
+            reader.Close();
+
+            return lines;
+        }
+
     }
 }
