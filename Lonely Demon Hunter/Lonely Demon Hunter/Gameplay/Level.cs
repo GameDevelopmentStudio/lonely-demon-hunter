@@ -9,6 +9,8 @@ using Microsoft.Xna.Framework.Graphics;
 using bEngine;
 using bEngine.Graphics;
 
+using ldh.Gameplay;
+
 namespace ldh
 {
     class Level : bGameState
@@ -22,6 +24,7 @@ namespace ldh
             entities.Add("entities", new List<bEntity>());
 
             _add(new TestEntity(0, 0), "entities");
+            _add(new Hunter(96 - 8, 96 - 12), "entities");
         }
 
         protected override bool _add(bEntity e, string category)

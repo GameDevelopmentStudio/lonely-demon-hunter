@@ -11,6 +11,11 @@ namespace ldh
     {
         Level level;
 
+        protected override void initSettings()
+        {
+            base.initSettings();
+        }
+
         protected override void Initialize()
         {
             // TODO: Init data managers
