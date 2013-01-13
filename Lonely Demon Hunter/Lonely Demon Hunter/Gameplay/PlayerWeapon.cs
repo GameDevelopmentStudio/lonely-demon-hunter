@@ -82,7 +82,7 @@ namespace ldh.Gameplay
 
         public void render(SpriteBatch sb, Vector2 pos)
         {
-            pos = Hunter.subtract(pos, currentHotspot);
+            pos = Utils.subtract(pos, currentHotspot);
             graphic.render(sb, pos);
             sb.Draw(bDummyRect.sharedDummyRect(game), 
                     new Rectangle((int) pos.X, (int) pos.Y, 1, 1), 

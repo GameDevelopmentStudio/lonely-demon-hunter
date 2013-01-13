@@ -11,18 +11,21 @@ using Microsoft.Xna.Framework.Graphics;
 
 using bEngine;
 using bEngine.Graphics;
+using bEngine.Helpers;
 
 namespace ldh.Gameplay
 {
-    class Hunter : bEntity
+    class Hunter : Entity
     {
         bSpritemap graphic;
+        bStamp shadowGraphic;
+
         String debugText;
 
         float walkSpeed = 2.0f;
-        string facing;
+        public string facing;
 
-        PlayerWeapon activeWeapon;
+        public PlayerWeapon activeWeapon;
         Dictionary<int, Point> frameHotspots;
 
         List<string> weaponBehindPlayerDirectionList;
@@ -37,12 +40,15 @@ namespace ldh.Gameplay
         {
             base.init();
 
+            shadowGraphic = new bStamp(game.Content.Load<Texture2D>("shadow"));
+            shadowGraphic.alpha = 0.4f;
+
             graphic = new bSpritemap(game.Content.Load<Texture2D>("hunter"), 16, 24);
             string[] names = {"s", "sw", "w", "nw", 
                               "n", "ne", "e", "se"};
-            int[][] frames = new int[][] { new int[] { 0,  1 }, new int[] { 8, 9 }, 
+            int[][] frames = new int[][] { new int[] {  0,  1 }, new int[] {  8,  9 }, 
                                            new int[] { 16, 17 }, new int[] { 24, 25 },  
-                                           new int[] { 32, 33}, new int[] {40, 41}, 
+                                           new int[] { 32, 33 }, new int[] { 40, 41 }, 
                                            new int[] { 48, 49 }, new int[] { 56, 57 } };
             int counter = 0;
             foreach (string name in names)
@@ -72,13 +78,20 @@ namespace ldh.Gameplay
             // Weapon holding related
             frameHotspots = parseFrameHotspots();
             weaponBehindPlayerDirectionList = new List<string>{"sw", "w", "nw", "n"};
+
+            mask.w = 12;
+            mask.h = 9;
+            mask.offsetx = 2;
+            mask.offsety = 15;
         }
         
         public override void update()
         {
-            base.update();
-
             bool moving = false;
+            Vector2 nextPos = pos;
+            float walkSpeed = this.walkSpeed;
+            if (input.check(Buttons.B))
+                walkSpeed *= 2;
 
             Vector2 inputDirection = input.currentPadState.ThumbSticks.Left;
             inputDirection.Y *= -1;
@@ -101,8 +114,7 @@ namespace ldh.Gameplay
                 }
                 else if (inputAngle >= 22.5 && inputAngle < 69.5) 
                 {
-                    actualDirection = new Vector2((float)Math.Cos(MathHelper.ToRadians(315)),
-                                                  (float)Math.Sin(MathHelper.ToRadians(315)));
+                    actualDirection = new Vector2(1f, -1f);
                     inputFacing = "ne";
                 } 
                 else if (inputAngle >= 69.5 && inputAngle < 112.5) 
@@ -112,8 +124,7 @@ namespace ldh.Gameplay
                 } 
                 else if (inputAngle >= 112.5 && inputAngle < 157.5) 
                 {
-                    actualDirection = new Vector2((float)Math.Cos(MathHelper.ToRadians(225)),
-                                                  (float)Math.Sin(MathHelper.ToRadians(225)));
+                    actualDirection = new Vector2(-1f, -1f);
                     inputFacing = "nw";
                 } 
                 else if (inputAngle >= 157.5 && inputAngle < 202.5) 
@@ -123,8 +134,7 @@ namespace ldh.Gameplay
                 } 
                 else if (inputAngle >= 202.5 && inputAngle < 247.5) 
                 {
-                    actualDirection = new Vector2((float)Math.Cos(MathHelper.ToRadians(135)),
-                                                  (float)Math.Sin(MathHelper.ToRadians(135)));
+                    actualDirection = new Vector2(-1f, 1f);
                     inputFacing = "sw";
                 }
                 else if (inputAngle >= 247.5 && inputAngle < 292.5)
@@ -134,8 +144,7 @@ namespace ldh.Gameplay
                 }
                 else
                 {
-                    actualDirection = new Vector2((float)Math.Cos(MathHelper.ToRadians(45)),
-                                                  (float)Math.Sin(MathHelper.ToRadians(45)));
+                    actualDirection = new Vector2(1f, 1f);
                     inputFacing = "se";
                 }
 
@@ -145,7 +154,8 @@ namespace ldh.Gameplay
             if (inputDirection.Length() >= input.getJoystickDeadzone() * 1.75)
             {
                 moving = true;
-                pos += actualDirection * walkSpeed;
+                nextPos += actualDirection * walkSpeed;
+                moveToContact(nextPos, "entities", solidCheck);
             }
 
             // TODO: refactor this code to use a handleGraphics() method
@@ -158,15 +168,19 @@ namespace ldh.Gameplay
             name += facing;
 
             graphic.play(name);
-            activeWeapon.play(name);
+            activeWeapon.play("idle-" + facing);
             
             graphic.update();
             activeWeapon.update();
+
+            base.update();
         }
         
         public override void render(GameTime dt, SpriteBatch sb)
         {
             base.render(dt, sb);
+
+            shadowGraphic.render(sb, x, y + 18);
 
             if (weaponBehindPlayerDirectionList.Contains(facing))
             {
@@ -188,33 +202,30 @@ namespace ldh.Gameplay
             }
         }
 
-            protected void renderPlayer(SpriteBatch sb)
-            {
-                graphic.render(sb, pos);
-            }
-
-            protected void renderWeapon(SpriteBatch sb)
-            {
-                Point hotspot = frameHotspots[graphic.currentAnim.frame];
-                Vector2 hotspotPosition = add(pos, hotspot);
-                activeWeapon.render(sb, hotspotPosition);
-                sb.Draw(bDummyRect.sharedDummyRect(game),
-                        new Rectangle((int)hotspotPosition.X, (int)hotspotPosition.Y, 1, 1),
-                        Color.Coral);
-            }
-
-        // TODO: Move this to Utils package!
-        public static Vector2 add(Vector2 v, Point p)
+        protected void renderPlayer(SpriteBatch sb)
         {
-            return new Vector2(v.X + p.X, v.Y + p.Y);
+            graphic.render(sb, pos);
         }
 
-        public static Vector2 subtract(Vector2 v, Point p)
+        protected void renderWeapon(SpriteBatch sb)
         {
-            return new Vector2(v.X - p.X, v.Y - p.Y);
+            Point hotspot = frameHotspots[graphic.currentAnim.frame];
+            Vector2 hotspotPosition = Utils.add(pos, hotspot);
+            activeWeapon.render(sb, hotspotPosition);
+            sb.Draw(bDummyRect.sharedDummyRect(game),
+                    new Rectangle((int)hotspotPosition.X, (int)hotspotPosition.Y, 1, 1),
+                    Color.Coral);
         }
 
-        protected Dictionary<int, Point> parseFrameHotspots()
+        protected bool solidCheck(bEntity self, bEntity other)
+        {
+            if (other is Entity)
+                return (other as Entity).solid;
+            else
+                return true;
+        }
+
+        protected static Dictionary<int, Point> parseFrameHotspots()
         {
             Dictionary<int, Point> result = new Dictionary<int, Point>();
 
@@ -230,7 +241,7 @@ namespace ldh.Gameplay
             return result;
         }
 
-        protected Queue<string> readFile(string fname)
+        protected static Queue<string> readFile(string fname)
         {
             // Read cfg file
             StreamReader reader = new StreamReader(fname);

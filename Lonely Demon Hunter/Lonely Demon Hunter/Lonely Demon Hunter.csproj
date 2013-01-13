@@ -108,9 +108,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Game.cs" />
+    <Compile Include="Gameplay\Data.cs" />
+    <Compile Include="Gameplay\Entity.cs" />
     <Compile Include="Gameplay\Hunter.cs" />
     <Compile Include="Gameplay\Level.cs" />
+    <Compile Include="Gameplay\LevelMap.cs" />
     <Compile Include="Gameplay\PlayerWeapon.cs" />
+    <Compile Include="Gameplay\Transfer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>
@@ -160,6 +164,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Assets\mace.cfg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\maps\ldh-maps.oep">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\maps\other-test.oel">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\maps\test.oel">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

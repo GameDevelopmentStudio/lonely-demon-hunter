@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <OgmoVersion>1.0</OgmoVersion>
+  <Name>Lonely demon hunter maps</Name>
+  <BackgroundColor A="255" R="125" G="160" B="255" />
+  <GridColor A="255" R="255" G="240" B="90" />
+  <LevelDefaultSize>
+    <Width>256</Width>
+    <Height>224</Height>
+  </LevelDefaultSize>
+  <LevelMinimumSize>
+    <Width>256</Width>
+    <Height>224</Height>
+  </LevelMinimumSize>
+  <LevelMaximumSize>
+    <Width>32767</Width>
+    <Height>32767</Height>
+  </LevelMaximumSize>
+  <Filename>D:\Dev\gamedevstudio\projects\lonely-demon-hunter\Lonely Demon Hunter\Lonely Demon Hunter\Assets\maps\ldh-maps.oep</Filename>
+  <AngleMode>Radians</AngleMode>
+  <CameraEnabled>false</CameraEnabled>
+  <CameraSize>
+    <Width>640</Width>
+    <Height>480</Height>
+  </CameraSize>
+  <ExportCameraPosition>false</ExportCameraPosition>
+  <LevelValueDefinitions />
+  <LayerDefinitions>
+    <LayerDefinition xsi:type="GridLayerDefinition">
+      <Name>Solids</Name>
+      <Grid>
+        <Width>8</Width>
+        <Height>8</Height>
+      </Grid>
+      <ScrollFactor>
+        <X>1</X>
+        <Y>1</Y>
+      </ScrollFactor>
+      <Color A="255" R="128" G="0" B="128" />
+      <ExportMode>Bitstring</ExportMode>
+    </LayerDefinition>
+    <LayerDefinition xsi:type="TileLayerDefinition">
+      <Name>Tiles</Name>
+      <Grid>
+        <Width>16</Width>
+        <Height>16</Height>
+      </Grid>
+      <ScrollFactor>
+        <X>1</X>
+        <Y>1</Y>
+      </ScrollFactor>
+      <ExportMode>CSV</ExportMode>
+    </LayerDefinition>
+    <LayerDefinition xsi:type="EntityLayerDefinition">
+      <Name>Entities</Name>
+      <Grid>
+        <Width>16</Width>
+        <Height>16</Height>
+      </Grid>
+      <ScrollFactor>
+        <X>1</X>
+        <Y>1</Y>
+      </ScrollFactor>
+    </LayerDefinition>
+  </LayerDefinitions>
+  <Tilesets>
+    <Tileset>
+      <Name>basic</Name>
+      <FilePath>..\..\..\Lonely Demon HunterContent\tset-test.png</FilePath>
+      <TileSize>
+        <Width>16</Width>
+        <Height>16</Height>
+      </TileSize>
+      <TileSep>0</TileSep>
+    </Tileset>
+  </Tilesets>
+  <EntityDefinitions>
+    <EntityDefinition Name="Transfer" Limit="-1" ResizableX="false" ResizableY="false" Rotatable="false" RotateIncrement="15">
+      <Size>
+        <Width>16</Width>
+        <Height>16</Height>
+      </Size>
+      <Origin>
+        <X>0</X>
+        <Y>0</Y>
+      </Origin>
+      <ImageDefinition DrawMode="Rectangle" ImagePath="" Tiled="false">
+        <RectColor A="255" R="0" G="128" B="255" />
+      </ImageDefinition>
+      <ValueDefinitions>
+        <ValueDefinition xsi:type="StringValueDefinition" Name="TargetMap" Default="" MaxChars="-1" MultiLine="false" />
+        <ValueDefinition xsi:type="IntValueDefinition" Name="TargetX" Default="0" Min="0" Max="32767" ShowSlider="false" />
+        <ValueDefinition xsi:type="IntValueDefinition" Name="TargetY" Default="0" Min="0" Max="32767" ShowSlider="false" />
+        <ValueDefinition xsi:type="EnumValueDefinition" Name="Facing">
+          <Elements>
+            <string>s</string>
+            <string>sw</string>
+            <string>w</string>
+            <string>nw</string>
+            <string>n</string>
+            <string>ne</string>
+            <string>e</string>
+            <string>se</string>
+          </Elements>
+        </ValueDefinition>
+        <ValueDefinition xsi:type="EnumValueDefinition" Name="Transition">
+          <Elements>
+            <string>default</string>
+            <string>fadeto</string>
+            <string>blinkto</string>
+            <string>nil</string>
+          </Elements>
+        </ValueDefinition>
+        <ValueDefinition xsi:type="ColorValueDefinition" Name="Color">
+          <Default A="255" R="255" G="128" B="128" />
+        </ValueDefinition>
+      </ValueDefinitions>
+      <NodesDefinition Enabled="false" Limit="-1" DrawMode="None" Ghost="false" />
+    </EntityDefinition>
+  </EntityDefinitions>
+</project>
