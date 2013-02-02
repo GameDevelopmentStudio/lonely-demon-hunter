@@ -12,12 +12,30 @@ namespace ldh.Gameplay
     {
         public string tag;
         public bool solid;
+        public int depth;
+
+        public virtual int getWidth()
+        {
+            return 0;
+        }
+
+        public virtual int getHeight()
+        {
+            return 0;
+        }
 
         public Entity(int x, int y)
             : base(x, y)
         {
             tag = "";
             solid = false;
+            depth = 0;
+        }
+
+        public static bool onPause()
+        {
+            // Can be overrided for per-entity pause actions
+            return Data.getInstance().pauseEntities;
         }
 
         public static bool parseFromFile(Entity entity, XmlReader reader)

@@ -13,12 +13,22 @@ using bEngine;
 using bEngine.Graphics;
 using bEngine.Helpers;
 
+using ldh.Gameplay.Interactions;
+
 namespace ldh.Gameplay
 {
-    class Hunter : Entity
+    class Player : Entity
     {
         bSpritemap graphic;
         bStamp shadowGraphic;
+
+        public Vector2 midpos 
+        { 
+            get 
+            { 
+                return new Vector2(x + getWidth() / 2, y + getHeight() / 2); 
+            } 
+        }
 
         String debugText;
 
@@ -30,7 +40,10 @@ namespace ldh.Gameplay
 
         List<string> weaponBehindPlayerDirectionList;
 
-        public Hunter(int x, int y)
+        public enum PlayerState { Idle, Attack };
+        public PlayerState state;
+
+        public Player(int x, int y)
             : base(x, y)
         {
             debugText = "";
@@ -46,10 +59,13 @@ namespace ldh.Gameplay
             graphic = new bSpritemap(game.Content.Load<Texture2D>("hunter"), 16, 24);
             string[] names = {"s", "sw", "w", "nw", 
                               "n", "ne", "e", "se"};
+
+            // Add idle and walk animations
             int[][] frames = new int[][] { new int[] {  0,  1 }, new int[] {  8,  9 }, 
                                            new int[] { 16, 17 }, new int[] { 24, 25 },  
                                            new int[] { 32, 33 }, new int[] { 40, 41 }, 
                                            new int[] { 48, 49 }, new int[] { 56, 57 } };
+
             int counter = 0;
             foreach (string name in names)
             {
@@ -69,6 +85,12 @@ namespace ldh.Gameplay
                 counter++;
             }
 
+            // Add attack animations
+            for (int i = 0; i < frames.Length; i++)
+            {
+                graphic.add(new bAnim("fire-" + names[i], new int[1] { i * 8 + 2 }, 0.2f, false));
+            }
+            
             facing = "s";
 
             activeWeapon = new PlayerWeapon(game);
@@ -83,95 +105,160 @@ namespace ldh.Gameplay
             mask.h = 9;
             mask.offsetx = 2;
             mask.offsety = 15;
+
+            state = PlayerState.Idle;
         }
         
+        protected Vector2 getFacingPosition(string direction = null, int delta = 8)
+        {
+            Vector2 position = new Vector2(x, y);
+            if (direction == null)
+                direction = facing;
+
+            if (direction.IndexOf("n") >= 0)
+                position.Y -= delta;
+            else if (direction.IndexOf("s") >= 0)
+                position.Y += delta;
+            if (direction.IndexOf("w") >= 0)
+                position.X -= delta;
+            else if (direction.IndexOf("e") >= 0)
+                position.X += delta;
+
+            return position;
+        }
+
         public override void update()
         {
+            if (onPause())
+                return;
+
             bool moving = false;
             Vector2 nextPos = pos;
             float walkSpeed = this.walkSpeed;
             if (input.check(Buttons.B))
                 walkSpeed *= 2;
-
-            Vector2 inputDirection = input.currentPadState.ThumbSticks.Left;
-            inputDirection.Y *= -1;
-            Vector2 actualDirection = Vector2.Zero;
-
-            float inputAngle = 0.0f;
-            string inputFacing = null;
-            
-            if (inputDirection.Length() >= input.getJoystickDeadzone())
+            if (state == PlayerState.Idle)
             {
-                inputAngle = MathHelper.ToDegrees((float)Math.Atan2(inputDirection.X, inputDirection.Y)) - 90;
+                Vector2 inputDirection = input.currentPadState.ThumbSticks.Left;
+                inputDirection.Y *= -1;
+                Vector2 actualDirection = Vector2.Zero;
 
-                if (inputAngle < 0)
-                    inputAngle += 360;
+                float inputAngle = 0.0f;
+                string inputFacing = null;
 
-                if (inputAngle >= 0 && inputAngle < 22.5 || inputAngle >= 337.5)
+                if (inputDirection.Length() >= input.getJoystickDeadzone())
                 {
-                    actualDirection = new Vector2(1, 0);
-                    inputFacing = "e";
-                }
-                else if (inputAngle >= 22.5 && inputAngle < 69.5) 
-                {
-                    actualDirection = new Vector2(1f, -1f);
-                    inputFacing = "ne";
-                } 
-                else if (inputAngle >= 69.5 && inputAngle < 112.5) 
-                {
-                    actualDirection = new Vector2(0, -1);
-                    inputFacing = "n";
-                } 
-                else if (inputAngle >= 112.5 && inputAngle < 157.5) 
-                {
-                    actualDirection = new Vector2(-1f, -1f);
-                    inputFacing = "nw";
-                } 
-                else if (inputAngle >= 157.5 && inputAngle < 202.5) 
-                {
-                    actualDirection = new Vector2(-1, 0);
-                    inputFacing = "w";
-                } 
-                else if (inputAngle >= 202.5 && inputAngle < 247.5) 
-                {
-                    actualDirection = new Vector2(-1f, 1f);
-                    inputFacing = "sw";
-                }
-                else if (inputAngle >= 247.5 && inputAngle < 292.5)
-                {
-                    actualDirection = new Vector2(0, 1);
-                    inputFacing = "s";
-                }
-                else
-                {
-                    actualDirection = new Vector2(1f, 1f);
-                    inputFacing = "se";
+                    inputAngle = MathHelper.ToDegrees((float)Math.Atan2(inputDirection.X, inputDirection.Y)) - 90;
+
+                    if (inputAngle < 0)
+                        inputAngle += 360;
+
+                    if (inputAngle >= 0 && inputAngle < 22.5 || inputAngle >= 337.5)
+                    {
+                        actualDirection = new Vector2(1, 0);
+                        inputFacing = "e";
+                    }
+                    else if (inputAngle >= 22.5 && inputAngle < 69.5)
+                    {
+                        actualDirection = new Vector2(1f, -1f);
+                        inputFacing = "ne";
+                    }
+                    else if (inputAngle >= 69.5 && inputAngle < 112.5)
+                    {
+                        actualDirection = new Vector2(0, -1);
+                        inputFacing = "n";
+                    }
+                    else if (inputAngle >= 112.5 && inputAngle < 157.5)
+                    {
+                        actualDirection = new Vector2(-1f, -1f);
+                        inputFacing = "nw";
+                    }
+                    else if (inputAngle >= 157.5 && inputAngle < 202.5)
+                    {
+                        actualDirection = new Vector2(-1, 0);
+                        inputFacing = "w";
+                    }
+                    else if (inputAngle >= 202.5 && inputAngle < 247.5)
+                    {
+                        actualDirection = new Vector2(-1f, 1f);
+                        inputFacing = "sw";
+                    }
+                    else if (inputAngle >= 247.5 && inputAngle < 292.5)
+                    {
+                        actualDirection = new Vector2(0, 1);
+                        inputFacing = "s";
+                    }
+                    else
+                    {
+                        actualDirection = new Vector2(1f, 1f);
+                        inputFacing = "se";
+                    }
+
+                    facing = inputFacing;
                 }
 
-                facing = inputFacing;
+                if (input.pressed(Buttons.X))
+                {
+                    IActivable activable = null;
+                    
+                    activable = (instancePlace(getFacingPosition(), 
+                                               "entities", null, 
+                                               activableCheck) as IActivable);
+                    if (activable == null)
+                    {
+                        state = PlayerState.Attack;
+                        graphic.play("fire-" + facing);
+                    }
+                    else
+                    {
+                        activable.activate(this);
+                    }
+                }
+                else if (inputDirection.Length() >= input.getJoystickDeadzone() * 1.75)
+                {
+                    moving = true;
+                    nextPos += actualDirection * walkSpeed;
+                    moveToContact(nextPos, "entities", solidCheck);
+                }
             }
-
-            if (inputDirection.Length() >= input.getJoystickDeadzone() * 1.75)
+            else if (state == PlayerState.Attack)
             {
-                moving = true;
-                nextPos += actualDirection * walkSpeed;
-                moveToContact(nextPos, "entities", solidCheck);
+                if (graphic.currentAnim.finished)
+                    state = PlayerState.Idle;
             }
 
             // TODO: refactor this code to use a handleGraphics() method
             string name;
-            if (moving)
-                name = "walk-";
+            if (state == PlayerState.Idle)
+            {
+                if (moving)
+                    name = "walk-";
+                else
+                    name = "idle-";
+            }
+            else if (state == PlayerState.Attack)
+            {
+                name = "fire-";
+            }
             else
+            {
+                // WTF state are you?
                 name = "idle-";
+            }
 
             name += facing;
 
             graphic.play(name);
-            activeWeapon.play("idle-" + facing);
+
+            if (state == PlayerState.Idle)
+                activeWeapon.play("idle-" + facing);
+            else
+                activeWeapon.play("fire-" + facing);
             
             graphic.update();
             activeWeapon.update();
+
+            depth = -(y + mask.offsety);
 
             base.update();
         }
@@ -225,6 +312,11 @@ namespace ldh.Gameplay
                 return true;
         }
 
+        protected bool activableCheck(bEntity self, bEntity other)
+        {
+            return (other is IActivable);
+        }
+
         protected static Dictionary<int, Point> parseFrameHotspots()
         {
             Dictionary<int, Point> result = new Dictionary<int, Point>();
@@ -273,5 +365,14 @@ namespace ldh.Gameplay
             return lines;
         }
 
+        public override int getWidth()
+        {
+            return graphic.spriteWidth;
+        }
+
+        public override int getHeight()
+        {
+            return graphic.spriteHeight;
+        }
     }
 }

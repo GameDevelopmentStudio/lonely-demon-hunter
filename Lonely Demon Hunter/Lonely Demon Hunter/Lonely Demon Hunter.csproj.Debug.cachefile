@@ -4,7 +4,10 @@ Content\hunter.xnb
 Content\mace.xnb
 Content\tset-test.xnb
 Content\shadow.xnb
+Content\dialogOwnershipMarker.xnb
 Content\font0.xnb
+Content\door.xnb
+Content\npc.xnb
 Assets\hunter.cfg
 Assets\mace.cfg
 Assets\maps\ldh-maps.oep

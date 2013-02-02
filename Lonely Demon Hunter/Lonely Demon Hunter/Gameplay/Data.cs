@@ -12,6 +12,8 @@ namespace ldh.Gameplay
         public string playerName;
         public Dictionary<string, bool> gameSwitches;
 
+        public bool pauseEntities;
+
         public string currentMap;
 
         public string targetMap;
@@ -31,6 +33,8 @@ namespace ldh.Gameplay
         {
             playerName = "Hunter";
             gameSwitches.Clear();
+
+            pauseEntities = false;
 
             currentMap = "";
 

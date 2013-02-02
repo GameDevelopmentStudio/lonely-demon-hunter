@@ -53,7 +53,7 @@ namespace ldh.Gameplay
 
         protected bool playerCheck(bEngine.bEntity self, bEngine.bEntity other)
         {
-            return (other is Hunter) && (mask.rect.Contains(other.mask.rect));
+            return (other is Player) && (mask.rect.Contains(other.mask.rect));
         }
 
         public static bool parseFromFile(Transfer e, XmlReader reader)

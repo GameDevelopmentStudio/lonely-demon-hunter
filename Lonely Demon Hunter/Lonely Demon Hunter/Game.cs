@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 using bEngine;
 using bEngine.Helpers.Transitions;
@@ -37,6 +38,37 @@ namespace ldh
             executeTransfer();
 
             base.Initialize();
+        }
+
+        protected override void Draw(GameTime gameTime)
+        {
+            Resolution.BeginDraw();
+            // Generate resolution render matrix 
+            Matrix matrix = Resolution.getTransformationMatrix();
+
+            // Game inits the spriteBatch if no camera is to be used
+            if (world == null || !world.usesCamera)
+            {
+                spriteBatch.Begin(SpriteSortMode.Deferred,
+                    BlendState.AlphaBlend,
+                    SamplerState.PointClamp,
+                    null,
+                    RasterizerState.CullCounterClockwise,
+                    null,
+                    matrix);
+            }
+            // If a camera is to be used, the GameState handles the init
+            if (world != null)
+                world.render(gameTime, spriteBatch, matrix);
+
+            // Game level draw routines
+            render(gameTime);
+
+            // Transition
+            if (gamestateTransition != null)
+                gamestateTransition.render(spriteBatch);
+
+            spriteBatch.End();
         }
 
         public void executeTransfer()

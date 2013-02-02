@@ -157,7 +157,7 @@ namespace ldh.Gameplay
                 hotspots.Add(new Point(int.Parse(lineData[1]), int.Parse(lineData[2])));
             }
 
-            anim = new bAnim(name, frameList, speed);
+            anim = new bAnim(name, frameList, speed, false);
 
             // Return result
             result = new Pair<bAnim, List<Point>>(anim, hotspots);

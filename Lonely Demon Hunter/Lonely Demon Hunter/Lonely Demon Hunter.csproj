@@ -109,8 +109,12 @@
   <ItemGroup>
     <Compile Include="Game.cs" />
     <Compile Include="Gameplay\Data.cs" />
+    <Compile Include="Gameplay\Door.cs" />
     <Compile Include="Gameplay\Entity.cs" />
-    <Compile Include="Gameplay\Hunter.cs" />
+    <Compile Include="Gameplay\Interactions\IActivable.cs" />
+    <Compile Include="Gameplay\Interactions\NPC.cs" />
+    <Compile Include="Gameplay\Message\Textbox.cs" />
+    <Compile Include="Gameplay\Player.cs" />
     <Compile Include="Gameplay\Level.cs" />
     <Compile Include="Gameplay\LevelMap.cs" />
     <Compile Include="Gameplay\PlayerWeapon.cs" />
@@ -174,6 +178,7 @@
     </None>
     <None Include="Assets\maps\test.oel">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </None>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
